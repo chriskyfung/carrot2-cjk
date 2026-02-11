@@ -2,8 +2,16 @@ import { pluralize } from "@carrotsearch/ui/lang/humanize.js";
 
 const parseSheet = async (file, logger) => {
   const XLSX = await import("xlsx");
-  const buffer = await file.arrayBuffer();
-  const workbook = XLSX.read(buffer, { type: "array" });
+  const buffer = await (
+    file.type === "text/csv" || file.name.toLowerCase().endsWith(".csv")
+      ? file.text()
+      : file.arrayBuffer()
+  );
+  const workbook = XLSX.read(buffer, {
+    type: file.type === "text/csv" || file.name.toLowerCase().endsWith(".csv")
+      ? "string"
+      : "array"
+  });
   const worksheet = workbook.Sheets[workbook.SheetNames[0]];
 
   const NO_DATA_MESSAGE = "The spreadsheet contains no data.";
