@@ -48,21 +48,30 @@ const etoolsDataSourcesOptions = [
 const etoolsCountryOptions = [
   { value: "web", label: "All" },
   { value: "AT", label: "Austria" },
+  { value: "CN", label: "China" },
   { value: "FR", label: "France" },
   { value: "DE", label: "Germany" },
   { value: "GB", label: "Great Britain" },
+  { value: "HK", label: "Hong Kong" },
   { value: "IT", label: "Italy" },
+  { value: "JP", label: "Japan" },
+  { value: "JP", label: "Japan" },
   { value: "LI", label: "Lichtenstein" },
+  { value: "KR", label: "South Korea" },
   { value: "ES", label: "Spain" },
-  { value: "CH", label: "Switzerland" }
+  { value: "CH", label: "Switzerland" },
+  { value: "TW", label: "Taiwan" }
 ];
 
 const etoolsLanguageOptions = [
   { value: "all", label: "All" },
+  { value: "zh", label: "Chinese" },
   { value: "en", label: "English" },
   { value: "fr", label: "French" },
   { value: "de", label: "German" },
   { value: "it", label: "Italian" },
+  { value: "ja", label: "Japanses" },
+  { value: "ko", label: "Korean" },
   { value: "es", label: "Spanish" }
 ];
 
