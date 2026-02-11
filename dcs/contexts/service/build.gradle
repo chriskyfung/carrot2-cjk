@@ -16,7 +16,10 @@ dependencies {
   [
     ":core",
     ":lang:polish",
-    ":lang:lucene"
+    ":lang:lucene",
+    ":lang:lucene-chinese",
+    ":lang:lucene-japanese",
+    ":lang:lucene-korean"
   ].each { prj ->
     implementation(project(prj))
     langResources project(path: prj, configuration: 'langResources')
