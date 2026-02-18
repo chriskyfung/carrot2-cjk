@@ -70,14 +70,14 @@ jobs:
           ./gradlew assemble
  
       - name: Store distribution ZIP
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: distribution
           path: 'distribution/build/distZip/*.zip'
           if-no-files-found: error
 
       - name: Store build info
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: build-properties
           path: 'distribution/build/build.properties'
@@ -98,13 +98,13 @@ jobs:
           token: ${{ secrets.GH_ACCESS_TOKEN }}
 
       - name: Download distribution ZIP
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: distribution
           path: ${{ env.DIST_DIR }}
 
       - name: Download build properties
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: build-properties
           path: ${{ env.DIST_DIR }}
