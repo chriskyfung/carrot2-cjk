@@ -8,14 +8,6 @@ updates:
       interval: "weekly"
     labels: [dependencies]
 
-  - package-ecosystem: "npm"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-    allow:
-      - dependency-type: "production"
-    open-pull-requests-limit: 0
-
   - package-ecosystem: gradle
     directory: /
     schedule:
@@ -24,3 +16,4 @@ updates:
     commit-message:
       prefix: deps(java)
     labels: [dependencies]
+
