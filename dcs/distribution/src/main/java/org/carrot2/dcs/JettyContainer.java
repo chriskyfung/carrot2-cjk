@@ -13,6 +13,7 @@ package org.carrot2.dcs;
 import static com.carrotsearch.console.launcher.Loggers.CONSOLE;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -28,6 +29,8 @@ import org.eclipse.jetty.compression.server.CompressionHandler;
 import org.eclipse.jetty.ee11.servlet.DefaultServlet;
 import org.eclipse.jetty.ee11.webapp.WebAppContext;
 import org.eclipse.jetty.server.Handler;
+import org.eclipse.jetty.server.HttpConfiguration;
+import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.ContextHandler;
@@ -42,7 +45,7 @@ public class JettyContainer {
 
   private final int port;
   private final String host;
-  private final Path webappContexts;
+  private final List<Path> webappContexts;
   private final String shutdownToken;
   private final boolean useGzip;
 
@@ -54,7 +57,7 @@ public class JettyContainer {
   public JettyContainer(
       int port,
       String host,
-      Path contexts,
+      List<Path> contexts,
       String shutdownToken,
       Integer maxThreads,
       boolean useGzip,
@@ -66,6 +69,32 @@ public class JettyContainer {
     this.maxThreads = maxThreads;
     this.useGzip = useGzip;
     this.idleTime = idleTime;
+  }
+
+  public JettyContainer(
+      int port,
+      String host,
+      Path contextRoot,
+      String shutdownToken,
+      Integer maxThreads,
+      boolean useGzip,
+      Integer idleTime) {
+    this.host = host;
+    this.port = port;
+    this.webappContexts = listWebappContexts(contextRoot);
+    this.shutdownToken = shutdownToken;
+    this.maxThreads = maxThreads;
+    this.useGzip = useGzip;
+    this.idleTime = idleTime;
+  }
+
+  public static List<Path> listWebappContexts(Path webappRoot) {
+    try (Stream<Path> list = Files.list(webappRoot)) {
+      return list.filter(dir -> !Files.isDirectory(dir.resolve("WEB-INF").resolve("web.xml")))
+          .toList();
+    } catch (IOException e) {
+      throw new UncheckedIOException(e);
+    }
   }
 
   public void start() throws Exception {
@@ -90,15 +119,8 @@ public class JettyContainer {
     return connector.getLocalPort();
   }
 
-  private void addContexts(Server server, ServerConnector connector, Path contexts)
+  private void addContexts(Server server, ServerConnector connector, List<Path> webapps)
       throws IOException {
-    List<Path> webapps;
-    try (Stream<Path> list = Files.list(contexts)) {
-      webapps =
-          list.filter(dir -> !Files.isDirectory(dir.resolve("WEB-INF").resolve("web.xml")))
-              .toList();
-    }
-
     ArrayList<WebAppContext> ctxHandlers = new ArrayList<>();
     for (Path context : webapps) {
       if (!Files.isRegularFile(context.resolve("WEB-INF").resolve("web.xml"))) {
@@ -237,8 +259,13 @@ public class JettyContainer {
       threadPool.setMaxThreads(maxThreads);
     }
 
+    // Turn off returning HTTP server version string.
+    HttpConfiguration httpConfig = new HttpConfiguration();
+    httpConfig.setSendXPoweredBy(false);
+    httpConfig.setSendServerVersion(false);
+
     Server server = new Server(threadPool);
-    connector = new ServerConnector(server);
+    connector = new ServerConnector(server, new HttpConnectionFactory(httpConfig));
     connector.setPort(port);
     connector.setHost(host);
     if (idleTime != null) {

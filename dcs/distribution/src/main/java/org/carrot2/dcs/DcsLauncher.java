@@ -54,6 +54,7 @@ public class DcsLauncher extends Command<ExitCode> {
   public static final String OPT_PID_FILE = "--pid-file";
   public static final String OPT_IDLE_TIME = "--idle-time";
   public static final String OPT_VERSION = "--version";
+  public static final String OPT_SERVICE_CONTEXT_ONLY = "--service-only";
 
   @Parameter(
       names = {"-p", OPT_PORT},
@@ -87,6 +88,11 @@ public class DcsLauncher extends Command<ExitCode> {
       description = "Use GZIP compression for responses.",
       arity = 1)
   public boolean useGzip = true;
+
+  @Parameter(
+      names = {OPT_SERVICE_CONTEXT_ONLY},
+      description = "Start with just the /service context, nothing else.")
+  public boolean serviceContextOnly;
 
   @Parameter(
       names = {OPT_PID_FILE},
@@ -137,9 +143,17 @@ public class DcsLauncher extends Command<ExitCode> {
         return ExitCodes.SUCCESS;
       }
 
+      List<Path> webappContexts = JettyContainer.listWebappContexts(home.resolve("web"));
+      if (serviceContextOnly) {
+        webappContexts =
+            webappContexts.stream()
+                .filter(ctx -> ctx.getFileName().toString().equals("service"))
+                .toList();
+      }
+
       JettyContainer c =
           new JettyContainer(
-              port, host, home.resolve("web"), shutdownToken, maxThreads, useGzip, idleTime);
+              port, host, webappContexts, shutdownToken, maxThreads, useGzip, idleTime);
       try {
         c.start();
       } catch (IOException e) {

@@ -28,6 +28,10 @@ public class EmbeddedDcs implements DcsService {
       throw new AssertionError("Can't run with pid file option on embedded DCS.");
     }
 
+    if (config.serviceOnly) {
+      throw new AssertionError("Can't run with service only option on embedded DCS.");
+    }
+
     container =
         new JettyContainer(
             0,

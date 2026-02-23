@@ -10,6 +10,7 @@
  */
 package org.carrot2.dcs.it;
 
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -63,6 +64,21 @@ public class DcsServiceScriptTest extends AbstractDistributionTest {
       Assertions.assertThat(pidFile).isRegularFile();
       var pid = Long.parseLong(Files.readString(pidFile, StandardCharsets.UTF_8));
       Assertions.assertThat(ProcessHandle.of(pid).get().isAlive()).isTrue();
+    }
+  }
+
+  @Test
+  public void serviceOnlyOption() throws IOException {
+    try (var service =
+        new ForkedDcs(new DcsConfig(getDistributionDir(), DCS_SHUTDOWN_TOKEN).withServiceOnly())) {
+
+      var body =
+          HttpRequest.builder()
+              .sendGet(service.getAddress().resolve("/"))
+              .assertStatus(HttpServletResponse.SC_NOT_FOUND)
+              .bodyAsUtf8();
+
+      Assertions.assertThat(body).contains("HTTP ERROR 404 Not Found");
     }
   }
 }

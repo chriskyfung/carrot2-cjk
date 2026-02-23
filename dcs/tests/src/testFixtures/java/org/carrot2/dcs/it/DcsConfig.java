@@ -23,6 +23,7 @@ public class DcsConfig {
   public Integer maxThreads;
   public boolean enableTestServlet;
   public boolean useGzip;
+  public boolean serviceOnly;
 
   public DcsConfig(Path distributionDir, String shutdownToken) {
     this.shutdownToken = Objects.requireNonNull(shutdownToken);
@@ -49,6 +50,11 @@ public class DcsConfig {
       throw new IOException("Not a directory: " + path);
     }
     this.pidFile = path;
+    return this;
+  }
+
+  public DcsConfig withServiceOnly() {
+    this.serviceOnly = true;
     return this;
   }
 }

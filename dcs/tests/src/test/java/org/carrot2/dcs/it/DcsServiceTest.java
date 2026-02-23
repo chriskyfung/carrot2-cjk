@@ -17,6 +17,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import org.assertj.core.api.Assertions;
 import org.carrot2.HttpRequest;
+import org.carrot2.HttpResponse;
 import org.carrot2.dcs.model.ClusterResponse;
 import org.carrot2.dcs.model.ErrorResponse;
 import org.carrot2.dcs.model.ErrorResponseType;
@@ -67,6 +68,25 @@ public class DcsServiceTest extends AbstractDcsTest {
     ErrorResponse errorResponse = parseJsonTo(body, ErrorResponse.class);
     Assertions.assertThat(errorResponse.type).isEqualTo(ErrorResponseType.BAD_REQUEST);
     Assertions.assertThat(errorResponse.exception).isEqualTo(JsonParseException.class.getName());
+  }
+
+  @Test
+  public void checkErrorsOmitJettyVersion() throws IOException {
+    HttpResponse httpResponse =
+        HttpRequest.builder()
+            .sendGet(dcs().getAddress().resolve("/non_existent_content"))
+            .assertStatus(HttpServletResponse.SC_NOT_FOUND);
+
+    Assertions.assertThat(httpResponse.headers())
+        .allSatisfy(
+            header -> {
+              Assertions.assertThat(header.getValue()).doesNotContainIgnoringCase("jetty");
+            });
+
+    String body = httpResponse.bodyAsUtf8();
+    Assertions.assertThat(body)
+        .doesNotContainIgnoringCase("powered by")
+        .doesNotContainIgnoringCase("jetty");
   }
 
   public static <T> T parseJsonTo(String json, Class<T> clazz) throws JsonProcessingException {

@@ -58,6 +58,10 @@ public class ForkedDcs implements DcsService {
       args.add(config.pidFile.toAbsolutePath().toString());
     }
 
+    if (config.serviceOnly) {
+      args.add(DcsLauncher.OPT_SERVICE_CONTEXT_ONLY);
+    }
+
     List<String> dcsOpts = new ArrayList<>();
     dcsOpts.add("-Xmx256m");
     if (config.enableTestServlet) {
